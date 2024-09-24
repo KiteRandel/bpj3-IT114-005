@@ -24,6 +24,12 @@ public class Problem1 {
         //hint: use the arr variable; don't diretly use the a1-a4 variables
         // Goal: output only add *values* of each passed array
         //TODO add/edit code here
+        //BPJ 9/23/24
+        for (int value : arr) { 
+            if (value % 2 != 0) {
+                System.out.print(value + " ");
+            }
+        }
         
         //end add/edit section
         System.out.println();
