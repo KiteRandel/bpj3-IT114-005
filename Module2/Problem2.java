@@ -26,9 +26,16 @@ public class Problem2 {
         // Goal 1: Sum all the values inside the passed in array
         // Goal 2: Ensure the resulting total is represented in currency format (without the $) (i.e., two decimal places always present)
         //TODO add/edit code here
-       
-        //set the double to a string variable
-        //TODO ensure rounding is to two decimal places (i.e., 0.10, 0.01, 1.00)
+        //BPJ 9/23/24
+        for (double num : arr) {
+            total += num; 
+        }
+        
+        // Round to two decimal places
+        total = Math.round(total * 100.00) / 100.00;
+        
+        // Show two decimal places
+        totalOutput = String.format("%.2f", total);
         totalOutput = total+"";
         //end add/edit section
         System.out.println("Total is " + totalOutput);
