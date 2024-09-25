@@ -27,6 +27,26 @@ public class Problem3 {
         //TODO convert each value to positive
         //set the result to the proper index of the output array and maintain the original data type
         //hint: don't forget to handle the data types properly, the result datatype should be the same as the original datatype
+        //BPJ 9/23/24
+        for (int i = 0; i < arr.length; i++) {
+            T stuff = arr[i];
+            
+            // Integers
+            if (stuff instanceof Integer) {
+                output[i] = Math.abs((Integer) stuff);
+            }
+            // Doubles
+            else if (stuff instanceof Double) {
+                output[i] = Math.abs((Double) stuff);
+            }
+            // Strings
+            else if (stuff instanceof String) {
+                // Convert to integer, make positive, then back to string
+                int value = Integer.parseInt((String) stuff);
+                output[i] = String.valueOf(Math.abs(value));
+            }
+        }
+        
         
         //end edit section
 
