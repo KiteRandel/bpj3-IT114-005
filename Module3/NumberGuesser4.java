@@ -23,6 +23,7 @@ public class NumberGuesser4 {
         String output = String.join(",", data);
         // Note: we don't need a file reference as FileWriter creates the file if it
         // doesn't exist
+
         try (FileWriter fw = new FileWriter(fileName)) {
             fw.write(String.join(",", fileHeaders));
             fw.write("\n");// new line
@@ -31,11 +32,13 @@ public class NumberGuesser4 {
             e.printStackTrace();
         }
     }
+    //bpj3 10/4/24
+    private String userName = ""; //Add a variable to store the player's name, which will be used to name the save file.
 
     private void loadState() {
         File file = new File(fileName);
         if (!file.exists()) {
-            // Not providing output here as it's expected for a fresh start
+            // Not providing output here as it's expected for a fresh start   
             return;
         }
         try (Scanner reader = new Scanner(file)) {
@@ -122,23 +125,33 @@ public class NumberGuesser4 {
     }
 
     private void processGuess(int guess) {
-        if (guess < 0) {
-            return;
-        }
-        System.out.println("You guessed " + guess);
-        if (guess == number) {
-            win();
-            pickNewRandom = true;
-        } else {
-            System.out.println("That's wrong");
-            strikes++;
-            if (strikes >= maxStrikes) {
-                lose();
-                pickNewRandom = true;
-            }
-        }
-        saveState();
+    if (guess < 0) {
+        return;
     }
+    System.out.println("You guessed " + guess);
+    if (guess == number) {
+        win();
+        pickNewRandom = true;
+    } else {
+        System.out.println("That's wrong");
+        
+        // Provide the "higher or lower" hint 
+        //bpj3 10/4/24
+        if (guess < number) {
+            System.out.println("Hint: The correct number is higher.");
+        } else {
+            System.out.println("Hint: The correct number is lower.");
+        }
+
+        strikes++;
+        if (strikes >= maxStrikes) {
+            lose(); 
+            pickNewRandom = true;
+        }
+    }
+    saveState(); 
+}
+
 
     private int strToNum(String message) {
         int guess = -1;
@@ -152,10 +165,20 @@ public class NumberGuesser4 {
         return guess;
     }
 
+        //bpj3 10/4/24
     public void start() {
         try (Scanner input = new Scanner(System.in);) {
             System.out.println("Welcome to NumberGuesser4.0");
             System.out.println("To exit, type the word 'quit'.");
+            
+            System.out.print("What's your name? "); // gonna ask them for name
+            userName = input.nextLine().trim(); 
+        
+            // Sanitize file name by removing spaces or invalid characters
+            fileName = "ng4_" + userName.replaceAll("[^a-zA-Z0-9]", "_") + ".txt";
+        
+            System.out.println("To exit, type the word 'quit'.");
+
             loadState();
             do {
                 if (pickNewRandom) {
