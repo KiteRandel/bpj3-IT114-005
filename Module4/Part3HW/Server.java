@@ -117,7 +117,7 @@ public class Server {
         }
         System.out.println("Checking command: " + message);
 
-        //bpj 10/10/24
+        //bpj3 10/10/24
         if ("/flip".equalsIgnoreCase(message)) {
             Random random = new Random();
             String result =random.nextBoolean() ? "heads" : "tails";
@@ -126,12 +126,12 @@ public class Server {
             return true;
         }
 
-        //bpj 10/10/24
+        //bpj3 10/10/24
         if (message.startsWith("/shuffle ")) {
-            String messageToShuffle = message.substring("/shuffle ".length()); // Extract the message after the command
+            String messageToShuffle = message.substring("/shuffle ".length()); // extract the message
             String shuffledMessage = shuffleMessage(messageToShuffle);
             String response = String.format("User[%s]: %s", sender.getClientId(), shuffledMessage);
-            relay(response, null); // Relay the shuffled message to all clients
+            relay(response, null); // gonna relay the shuffled message to all clients
             return true;
         }
 
@@ -147,7 +147,7 @@ public class Server {
         return false;
     }
 
-    //bpj 10/10/24
+    //bpj3 10/10/24
     private String shuffleMessage(String message) {
         List<Character> characters = new ArrayList<>();
         for (char c : message.toCharArray()) {
