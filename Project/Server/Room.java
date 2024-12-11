@@ -1,8 +1,10 @@
 package Project.Server;
 
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
 import Project.Common.LoggerUtil;
+import Project.Common.RollPayload;
 
 public class Room implements AutoCloseable{
     private String name;// unique name of the Room
@@ -59,6 +61,22 @@ public class Room implements AutoCloseable{
 
         autoCleanup();
 
+    }
+    //bpj3 11/22
+    private String textStructure(String content){
+        content = content.replaceAll("\\*\\*(.*?)\\*\\*", "<b>$1</b>");
+
+        content = content.replaceAll("\\*(.*?)\\*", "<i>$1</i>");
+
+        content = content.replaceAll("_(.*?)_", "<u>$1</u>");
+
+        content = content.replaceAll("#r (.*?) r#", "<red>$1</red>");
+
+        content = content.replaceAll("#b (.*?) b#", "<blue>$1</blue>");
+
+        content = content.replaceAll("#g (.*?) g#", "<green>$1</green>");
+
+        return content;
     }
 
     /**
@@ -187,21 +205,23 @@ public class Room implements AutoCloseable{
      * @param sender  ServerThread (client) sending the message or null if it's a
      *                server-generated message
      */
-    protected synchronized void sendMessage(ServerThread sender, String message) {
+    protected synchronized void sendMessage(ServerThread sender, String content) {
         if (!isRunning) { // block action if Room isn't running
             return;
         }
 
         // Note: any desired changes to the message must be done before this section
         long senderId = sender == null ? ServerThread.DEFAULT_CLIENT_ID : sender.getClientId();
-
+        
+        //bpj3 11/20 
+        String textStructure = textStructure(content);
         // loop over clients and send out the message; remove client if message failed
         // to be sent
         // Note: this uses a lambda expression for each item in the values() collection,
         // it's one way we can safely remove items during iteration
-        info(String.format("sending message to %s recipients: %s", clientsInRoom.size(), message));
+        info(String.format("sending message to %s recipients: %s", clientsInRoom.size(), textStructure));
         clientsInRoom.values().removeIf(client -> {
-            boolean failedToSend = !client.sendMessage(senderId, message);
+            boolean failedToSend = !client.sendMessage(senderId, textStructure);
             if (failedToSend) {
                 info(String.format("Removing disconnected client[%s] from list", client.getClientId()));
                 disconnect(client);
@@ -236,4 +256,55 @@ public class Room implements AutoCloseable{
     }
 
     // end receive data from ServerThread
+
+    //bpj3 11/19
+    protected void handleRollCommand(ServerThread sender, String rollCommand) {
+        try {
+            if (rollCommand.contains("d")) {
+                String[] parts = rollCommand.split("d");
+                int rolls = Integer.parseInt(parts[0]);
+                int sides = Integer.parseInt(parts[1]);
+    
+                if (rolls <= 0 || sides <= 0) {
+                    sender.sendMessage("Roll command is invalid. Both rolls and sides must be positive integers.");
+                    return;
+                }
+    
+                Random random = new Random();
+                StringBuilder rollResults = new StringBuilder();
+    
+                for (int i = 0; i < rolls; i++) {
+                    rollResults.append(random.nextInt(sides) + 1);
+                    if (i < rolls - 1) {
+                        rollResults.append(", ");
+                    }
+                }
+    
+                sendMessage(sender, String.format("Rolled %s and got: %s", rollCommand, rollResults));
+            } else {
+                int max = Integer.parseInt(rollCommand);
+    
+                if (max <= 0) {
+                    sender.sendMessage("Roll command is invalid. Has to be positive integer.");
+                    return;
+                }
+    
+                int result = new Random().nextInt(max) + 1;
+                sendMessage(sender, String.format("Rolled %s and got: %d", rollCommand, result));
+            }
+        } catch (NumberFormatException e) {
+            sender.sendMessage("Invalid roll command. (e.g., '2d6' or '10').");
+        }
+    }
+    
+    //bpj3 11/20
+    protected void handleFlipCommand(ServerThread sender){
+        double coin = Math.random();
+                if(coin > 0.5){
+                    sendMessage(sender, "flipped a coin and got heads");
+                }else{
+                    sendMessage(sender, "flipped a coin and got tails");
+                }
+        
+    }
 }

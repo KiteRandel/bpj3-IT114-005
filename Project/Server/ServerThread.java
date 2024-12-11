@@ -6,6 +6,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 import Project.Common.PayloadType;
+import Project.Common.RollPayload;
 import Project.Common.RoomResultsPayload;
 import Project.Common.Payload;
 
@@ -92,6 +93,8 @@ public class ServerThread extends BaseServerThread {
     }
 
     // handle received message from the Client
+   // In ServerThread class, add these methods to process new commands:
+
     @Override
     protected void processPayload(Payload payload) {
         try {
@@ -115,12 +118,26 @@ public class ServerThread extends BaseServerThread {
                 case DISCONNECT:
                     currentRoom.disconnect(this);
                     break;
+                //bpj3 11/23
+                case ROLLstuff:
+                    if (payload instanceof RollPayload rollPayload) {
+                        if (currentRoom != null) {
+                            currentRoom.handleRollCommand(this, rollPayload.getRollCommand());
+                        } else {
+                            sendMessage("You must join a room to use the roll command.");
+                        }
+                    }
+                    break;
+
+                //bpj3 11/23
+                case FLIPstuff:
+                    currentRoom.handleFlipCommand(this);
+                    break;
                 default:
                     break;
             }
         } catch (Exception e) {
-            LoggerUtil.INSTANCE.severe("Could not process Payload: " + payload,e);
-        
+            LoggerUtil.INSTANCE.severe("Could not process Payload: " + payload, e);
         }
     }
 
@@ -140,6 +157,18 @@ public class ServerThread extends BaseServerThread {
         cp.setPayloadType(PayloadType.SYNC_CLIENT);
         return send(cp);
     }
+    
+    // //bpj3 11/19
+    // //recieves RollPayload, processes it, passes it to relevant room
+    // @Override
+    // public void handlePayload(Payload payload) {
+    //     if (payload instanceof RollPayload) {
+    //         RollPayload rollPayload = (RollPayload) payload;
+    //         currentRoom.sendMessage(this, rollPayload.toString());
+    //     }
+    // }
+
+    
 
     /**
      * Overload of sendMessage used for server-side generated messages

@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 import Project.Common.ConnectionPayload;
 import Project.Common.LoggerUtil;
 import Project.Common.Payload;
+import Project.Common.RollPayload;
 import Project.Common.PayloadType;
 import Project.Common.RoomResultsPayload;
 import Project.Common.TextFX;
@@ -55,6 +56,8 @@ public enum Client {
     private final String LOGOFF = "logoff";
     private final String LOGOUT = "logout";
     private final String SINGLE_SPACE = " ";
+    private final String ROLLstuff = "roll";
+    private final String FLIPstuff = "flip";
 
     // needs to be private now that the enum logic is handling this
     private Client() {
@@ -185,13 +188,44 @@ public enum Client {
                         sendDisconnect();
                         wasCommand = true;
                         break;
+                    //bpj3 11/22
+                    case ROLLstuff:
+                        handleRollCommand(commandValue);
+                        wasCommand = true;
+                        break;
+
+                    case FLIPstuff:
+                        handleFlipCommand(commandValue);
+                        wasCommand = true;
+                        break;
                 }
                 return wasCommand;
             }
         }
         return false;
     }
-
+    //bpj3 11/22
+    private void handleRollCommand(String commandValue) {
+        if (!commandValue.isEmpty()) {
+            RollPayload rollPayload = new RollPayload();
+            rollPayload.setRollCommand(commandValue);
+            send(rollPayload);
+            LoggerUtil.INSTANCE.info(String.format("Rolled %s", commandValue));
+        } else {
+            LoggerUtil.INSTANCE.warning("Invalid usage. Use the /roll command with a value (e.g., /roll 6).");
+        }
+    }
+    //bpj3 11/22
+    private void handleFlipCommand(String commandValue) {
+        if (commandValue.isEmpty()) {
+            Payload flipPayload = new Payload();
+            flipPayload.setPayloadType(PayloadType.FLIPstuff);
+            send(flipPayload);
+            LoggerUtil.INSTANCE.info("Flipped a coin.");
+        } else {
+            LoggerUtil.INSTANCE.warning("Invalid usage. The /flip command does not accept additional arguments.");
+    }
+}
     // send methods to pass data to the ServerThread
 
     /**
@@ -500,5 +534,4 @@ public enum Client {
         }
     }
     // end payload processors
-
 }
