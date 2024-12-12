@@ -11,5 +11,9 @@ public enum PayloadType {
     ROOM_LIST, // client: query for rooms, server: result of query
     //bpj3 11/27
     ROLLstuff,
-    FLIPstuff;
+    FLIPstuff,
+    //bpj3 12/11
+    PRIVATEstuff,
+    MUTE,
+    UNMUTE;
 }

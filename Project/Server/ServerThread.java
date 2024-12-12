@@ -1,8 +1,10 @@
 package Project.Server;
 
 import java.net.Socket;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import Project.Common.PayloadType;
@@ -133,6 +135,28 @@ public class ServerThread extends BaseServerThread {
                 case FLIPstuff:
                     currentRoom.handleFlipCommand(this);
                     break;
+
+                //bpj3 12/11
+                case PRIVATEstuff:
+                // Private message handling
+                    long targetName = payload.getClientId(); // Assume this contains the target name
+                    String actualMessage = payload.getMessage(); // Assume this contains the actual message content
+                if (actualMessage == null || actualMessage.isEmpty()) {
+                    sendMessage("Invalid private message format. Use @username followed by your message.");
+                    return;
+                }
+                    currentRoom.handlePrivateMessage(this, targetName, actualMessage);
+                    break;
+                
+                //bpj3 12/11
+                case MUTE:
+                    long muteTargetId = payload.getClientId();
+                    currentRoom.handleMute(this, muteTargetId);
+                    break;
+                case UNMUTE:
+                    long unmuteTargetId = payload.getClientId();
+                    currentRoom.handleUnmute(this, unmuteTargetId);
+                    break;  
                 default:
                     break;
             }
@@ -140,7 +164,28 @@ public class ServerThread extends BaseServerThread {
             LoggerUtil.INSTANCE.severe("Could not process Payload: " + payload, e);
         }
     }
+    //bpj3 12/11
+    private Set<String> mutedClients = new HashSet<>();
+    //bpj3 12/11
+    public boolean addMutedClient(String clientName) {
+        boolean wasAdded = mutedClients.add(clientName); 
+        if (wasAdded) {
+            info("Client '" + clientName + "' muted.");
+        }
+        return wasAdded;
+    }
 
+    public boolean removeMutedClient(String clientName) {
+        boolean wasRemoved = mutedClients.remove(clientName); 
+        if (wasRemoved) {
+            info("Client '" + clientName + "' unmuted.");
+        }
+        return wasRemoved;
+    }
+
+    public boolean isMuted(String clientName) {
+        return mutedClients.contains(clientName);
+    }
     // send methods to pass data back to the Client
 
     public boolean sendRooms(List<String> rooms) {
